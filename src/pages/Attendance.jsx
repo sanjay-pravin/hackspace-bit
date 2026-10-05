@@ -7,18 +7,15 @@ import {
   AlertTriangle, 
   XCircle, 
   Camera, 
-  CameraOff, 
   MapPin, 
   RefreshCw,
-  KeyRound,
-  Users,
   Copy,
   Check
 } from 'lucide-react';
 import { attendanceService } from '../services/attendanceService';
 import { eventService } from '../services/eventService';
 import { useAuth } from '../context/AuthContext';
-import { formatTime, formatDate } from '../utils/formatters';
+import { formatTime } from '../utils/formatters';
 
 export default function Attendance() {
   const { user } = useAuth();
@@ -151,19 +148,19 @@ export default function Attendance() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Venue Gate & Attendance Operations</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Broadcast venue check-in OTPs, verify attendee passes, and map attendance to event venues.
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Venue Gate & Attendance Operations</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Broadcast venue check-in OTPs, verify attendee registrations, and map attendance to event venues.
           </p>
         </div>
 
         {/* Event selector */}
         <div className="flex items-center space-x-2">
-          <span className="text-xs text-slate-400">Event:</span>
+          <span className="text-xs text-slate-500 font-medium">Event:</span>
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value)}
-            className="py-1.5 px-3 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="py-1.5 px-3 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
           >
             {events.map((e) => (
               <option key={e.id} value={e.id}>{e.title}</option>
@@ -174,17 +171,17 @@ export default function Attendance() {
 
       {/* Active Venue OTP Broadcast Card */}
       {activeEvent && (
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1.5">
             <div className="flex items-center space-x-2">
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                 Active Gate Session
               </span>
-              <span className="text-xs font-semibold text-white">{activeEvent.title}</span>
+              <span className="text-xs font-semibold text-slate-900">{activeEvent.title}</span>
             </div>
-            <div className="flex items-center space-x-1.5 text-xs text-slate-400">
-              <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Assigned Venue: <strong className="text-white">{activeEvent.venue}</strong></span>
+            <div className="flex items-center space-x-1.5 text-xs text-slate-600">
+              <MapPin className="w-3.5 h-3.5 text-blue-600" />
+              <span>Assigned Venue: <strong className="text-slate-900">{activeEvent.venue}</strong></span>
             </div>
             <p className="text-[11px] text-slate-500">
               Students and squads entering this OTP will have attendance mapped as <strong>PRESENT</strong> at this venue.
@@ -192,10 +189,10 @@ export default function Attendance() {
           </div>
 
           {/* OTP Box */}
-          <div className="flex items-center space-x-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div className="flex items-center space-x-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
             <div>
               <span className="text-[9px] uppercase font-semibold text-slate-500 block">Venue Check-in OTP</span>
-              <span className="font-mono text-2xl font-black text-emerald-400 tracking-wider">
+              <span className="font-mono text-2xl font-black text-emerald-700 tracking-wider">
                 {activeEvent.venue_otp || '849201'}
               </span>
             </div>
@@ -203,14 +200,14 @@ export default function Attendance() {
             <div className="flex flex-col space-y-1">
               <button
                 onClick={handleCopyOtp}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition"
                 title="Copy OTP"
               >
-                {copiedOtp ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedOtp ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={handleRegenerateOtp}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition"
                 title="Generate fresh OTP"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
@@ -223,43 +220,43 @@ export default function Attendance() {
       {/* Verification Scanner & Manual Entry Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: QR Scanner */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
           <div className="space-y-1">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-1.5">
-              <Camera className="w-4 h-4 text-cyan-400" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center space-x-1.5">
+              <Camera className="w-4 h-4 text-blue-600" />
               <span>Camera QR Scanner</span>
             </h3>
-            <p className="text-xs text-slate-400">
-              Scan participant pass barcodes presented at the entrance.
+            <p className="text-xs text-slate-500">
+              Scan participant registration badges presented at the entrance.
             </p>
           </div>
 
-          <div className="relative aspect-video max-h-56 w-full rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center overflow-hidden">
+          <div className="relative aspect-video max-h-56 w-full rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center overflow-hidden">
             <div id={qrRegionId} className="w-full h-full" />
             {!isCameraActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center space-y-2 bg-slate-950/80">
-                <QrCode className="w-8 h-8 text-slate-600" />
-                <p className="text-xs text-slate-400">Camera currently off</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center space-y-2 bg-slate-50">
+                <QrCode className="w-8 h-8 text-slate-400" />
+                <p className="text-xs text-slate-500">Camera currently off</p>
               </div>
             )}
           </div>
 
           {cameraError && (
-            <p className="text-xs text-amber-300 bg-amber-950/40 p-2 rounded-lg">{cameraError}</p>
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 p-2 rounded-lg">{cameraError}</p>
           )}
 
           <div>
             {isCameraActive ? (
               <button
                 onClick={stopCamera}
-                className="w-full py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white transition"
+                className="w-full py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition"
               >
                 Stop Camera
               </button>
             ) : (
               <button
                 onClick={startCamera}
-                className="w-full py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center justify-center space-x-1.5"
+                className="w-full py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center justify-center space-x-1.5 shadow-sm"
               >
                 <Camera className="w-3.5 h-3.5" />
                 <span>Start Camera Scanner</span>
@@ -269,9 +266,9 @@ export default function Attendance() {
         </div>
 
         {/* Right: Manual Lookup & Scenario Switcher */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-1.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center space-x-1.5">
               <Search className="w-4 h-4 text-slate-400" />
               <span>Manual Registration ID Check-in</span>
             </h3>
@@ -289,19 +286,19 @@ export default function Attendance() {
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
                 placeholder="e.g. ACE-2026-X89K2L"
-                className="w-full py-2 px-3 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full py-2 px-3 rounded-lg bg-slate-50 border border-slate-300 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <button
                 type="submit"
                 disabled={verifying}
-                className="w-full py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white transition disabled:opacity-50"
+                className="w-full py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition disabled:opacity-50 shadow-sm"
               >
-                {verifying ? 'Checking database...' : 'Verify Pass'}
+                {verifying ? 'Checking database...' : 'Verify Registration'}
               </button>
             </form>
 
             {/* Quick Demo scenarios */}
-            <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
+            <div className="pt-2 border-t border-slate-100 space-y-1.5">
               <span className="text-[10px] uppercase font-bold text-slate-500 block">Quick Demo Pass Codes</span>
               <div className="flex flex-wrap gap-1.5">
                 <button
@@ -310,7 +307,7 @@ export default function Attendance() {
                     setManualCode('ACE-2026-X89K2L');
                     handleVerify('ACE-2026-X89K2L');
                   }}
-                  className="px-2 py-1 text-[10px] font-mono rounded bg-slate-800 hover:bg-slate-700 text-cyan-300"
+                  className="px-2 py-1 text-[10px] font-mono rounded bg-slate-100 hover:bg-slate-200 text-blue-700 border border-slate-200"
                 >
                   ACE-2026-X89K2L (Alex / Neural Knights)
                 </button>
@@ -320,7 +317,7 @@ export default function Attendance() {
                     setManualCode('ACE-2026-C44T9Q');
                     handleVerify('ACE-2026-C44T9Q');
                   }}
-                  className="px-2 py-1 text-[10px] font-mono rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  className="px-2 py-1 text-[10px] font-mono rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
                 >
                   ACE-2026-C44T9Q
                 </button>
@@ -338,23 +335,23 @@ export default function Attendance() {
       {verificationResult && (
         <div className="animate-in fade-in duration-200">
           {verificationResult.status === 'VERIFIED' && (
-            <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-xs space-y-2">
-              <div className="flex items-center space-x-2 text-emerald-400 font-bold">
-                <CheckCircle2 className="w-4 h-4" />
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs space-y-2">
+              <div className="flex items-center space-x-2 text-emerald-800 font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>ATTENDANCE RECORDED: PRESENT AT {verificationResult.participant?.venue}</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-300">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-700">
                 <div>
                   <span className="text-[10px] text-slate-500">Student:</span>
-                  <p className="font-semibold text-white">{verificationResult.participant?.name}</p>
+                  <p className="font-semibold text-slate-900">{verificationResult.participant?.name}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500">Pass Code:</span>
-                  <p className="font-mono text-cyan-300 font-semibold">{verificationResult.participant?.registrationId}</p>
+                  <span className="text-[10px] text-slate-500">Registration ID:</span>
+                  <p className="font-mono text-blue-600 font-semibold">{verificationResult.participant?.registrationId}</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500">Squad:</span>
-                  <p className="font-semibold text-purple-300">{verificationResult.participant?.teamName}</p>
+                  <p className="font-semibold text-purple-700">{verificationResult.participant?.teamName}</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500">Time:</span>
@@ -365,15 +362,15 @@ export default function Attendance() {
           )}
 
           {verificationResult.status === 'ALREADY_CHECKED_IN' && (
-            <div className="p-4 rounded-xl bg-amber-950/60 border border-amber-500/40 text-xs text-amber-300 flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
               <span>{verificationResult.message}</span>
             </div>
           )}
 
           {(verificationResult.status === 'CANCELLED' || verificationResult.status === 'NOT_FOUND') && (
-            <div className="p-4 rounded-xl bg-red-950/60 border border-red-500/40 text-xs text-red-300 flex items-center space-x-2">
-              <XCircle className="w-4 h-4 shrink-0" />
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center space-x-2">
+              <XCircle className="w-4 h-4 shrink-0 text-red-600" />
               <span>{verificationResult.message}</span>
             </div>
           )}
@@ -382,10 +379,10 @@ export default function Attendance() {
 
       {/* Attendance Gate Log */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-white">Live Gate Attendance Records</h3>
-        <div className="rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-800">
+        <h3 className="text-sm font-bold text-slate-900">Live Gate Attendance Records</h3>
+        <div className="rounded-xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-semibold border-b border-slate-200">
               <tr>
                 <th className="py-2.5 px-3">Pass ID</th>
                 <th className="py-2.5 px-3">Attendee</th>
@@ -395,21 +392,21 @@ export default function Attendance() {
                 <th className="py-2.5 px-3">Timestamp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-100">
               {recentLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-800/40">
-                  <td className="py-2 px-3 font-mono font-bold text-cyan-400">{log.registrationId}</td>
-                  <td className="py-2 px-3 font-medium text-white">{log.studentName}</td>
-                  <td className="py-2 px-3 text-slate-300">{log.venue}</td>
+                <tr key={log.id} className="hover:bg-slate-50">
+                  <td className="py-2 px-3 font-mono font-bold text-blue-600">{log.registrationId}</td>
+                  <td className="py-2 px-3 font-medium text-slate-900">{log.studentName}</td>
+                  <td className="py-2 px-3 text-slate-600">{log.venue}</td>
                   <td className="py-2 px-3">
-                    <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-mono bg-slate-800 text-slate-300">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-mono bg-slate-100 text-slate-700 border border-slate-200">
                       {log.verification_method === 'venue_otp' ? 'Venue OTP' : 'QR Scan'}
                     </span>
                   </td>
                   <td className="py-2 px-3">
-                    <span className="text-emerald-400 font-semibold text-[11px]">PRESENT</span>
+                    <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-semibold text-[10px]">PRESENT</span>
                   </td>
-                  <td className="py-2 px-3 text-slate-400">{formatTime(log.checked_in_at)}</td>
+                  <td className="py-2 px-3 text-slate-500">{formatTime(log.checked_in_at)}</td>
                 </tr>
               ))}
             </tbody>

@@ -48,20 +48,20 @@ export function generateRegistrationId() {
 export function getCategoryBadgeClass(category) {
   switch (category) {
     case 'Hackathon':
-      return 'bg-purple-950/70 text-purple-300 border-purple-800/60';
+      return 'bg-purple-100 text-purple-800 border border-purple-200';
     case 'Technical Workshop':
-      return 'bg-blue-950/70 text-blue-300 border-blue-800/60';
+      return 'bg-blue-100 text-blue-800 border border-blue-200';
     case 'Coding Competition':
-      return 'bg-emerald-950/70 text-emerald-300 border-emerald-800/60';
+      return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
     case 'Seminar':
-      return 'bg-amber-950/70 text-amber-300 border-amber-800/60';
+      return 'bg-amber-100 text-amber-800 border border-amber-200';
     case 'Cultural Event':
-      return 'bg-pink-950/70 text-pink-300 border-pink-800/60';
+      return 'bg-pink-100 text-pink-800 border border-pink-200';
     case 'Sports Event':
-      return 'bg-orange-950/70 text-orange-300 border-orange-800/60';
+      return 'bg-orange-100 text-orange-800 border border-orange-200';
     case 'Innovation Challenge':
-      return 'bg-cyan-950/70 text-cyan-300 border-cyan-800/60';
+      return 'bg-cyan-100 text-cyan-800 border border-cyan-200';
     default:
-      return 'bg-slate-800 text-slate-300 border-slate-700';
+      return 'bg-slate-100 text-slate-700 border border-slate-200';
   }
 }

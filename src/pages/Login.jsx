@@ -69,10 +69,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4 py-10 bg-slate-950">
+    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4 py-10 bg-slate-50">
       <div className="max-w-[420px] w-full space-y-4">
         {/* Portal Switcher Tabs */}
-        <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+        <div className="flex bg-slate-200/80 p-1 rounded-xl border border-slate-300 text-xs font-semibold">
           <button
             type="button"
             onClick={() => {
@@ -83,8 +83,8 @@ export default function Login() {
             }}
             className={`flex-1 py-2 rounded-lg transition text-center ${
               portalMode === 'pcdp'
-                ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-blue-600 text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             PCDP Portal (BIT Sathy)
@@ -100,7 +100,7 @@ export default function Login() {
             className={`flex-1 py-2 rounded-lg transition text-center ${
               portalMode === 'admin'
                 ? 'bg-purple-600 text-white shadow-sm font-bold'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Faculty / Admin
@@ -108,7 +108,7 @@ export default function Login() {
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-300 flex items-center space-x-2">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center space-x-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -116,7 +116,7 @@ export default function Login() {
 
         {portalMode === 'pcdp' ? (
           /* Exact Match to ps.bitsathy.ac.in screenshot */
-          <div className="bg-white text-slate-800 rounded-2xl shadow-2xl p-7 sm:p-8 space-y-5 border border-slate-100">
+          <div className="bg-white text-slate-800 rounded-2xl shadow-xl p-7 sm:p-8 space-y-5 border border-slate-200">
             {/* Logo and Header */}
             <div className="text-center space-y-1">
               <div className="flex items-center justify-center space-x-2">
@@ -156,7 +156,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-2.5 px-4 rounded-lg text-xs font-bold bg-[#6366f1] hover:bg-[#5254db] text-white shadow-md transition disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-lg text-xs font-bold bg-[#6366f1] hover:bg-[#5254db] text-white shadow-sm transition disabled:opacity-50"
               >
                 {submitting ? 'Verifying with PCDP Portal...' : 'Login'}
               </button>
@@ -201,50 +201,50 @@ export default function Login() {
           </div>
         ) : (
           /* Faculty / Admin Login Card */
-          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center space-x-2 text-purple-400">
+          <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xl space-y-4">
+            <div className="flex items-center space-x-2 text-purple-700">
               <ShieldCheck className="w-5 h-5" />
-              <h3 className="text-sm font-bold text-white">Staff & Organizer Console</h3>
+              <h3 className="text-sm font-bold text-slate-900">Staff & Organizer Console</h3>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Access hackathon publish controls, venue OTP gates, and real-time participant verification.
             </p>
 
             <form onSubmit={handleAdminLogin} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Staff Email ID</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Staff Email ID</label>
                 <input
                   type="email"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="sarah.admin@campus.edu"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Admin Password</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Password</label>
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-2.5 px-4 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-sm transition disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition disabled:opacity-50"
               >
                 {submitting ? 'Verifying Admin Access...' : 'Sign In as Faculty Admin'}
               </button>
             </form>
 
-            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
               <span>Quick Demos:</span>
               <div className="flex gap-2">
                 <button
@@ -253,11 +253,11 @@ export default function Login() {
                     setUsername('sarah.admin@campus.edu');
                     setPassword('password123');
                   }}
-                  className="text-purple-400 hover:text-purple-300 underline font-mono text-[10px]"
+                  className="text-purple-600 hover:text-purple-700 underline font-mono text-[10px]"
                 >
                   Admin (Sarah)
                 </button>
-                <span className="text-slate-600">•</span>
+                <span className="text-slate-300">•</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -265,7 +265,7 @@ export default function Login() {
                     setUsername('alex.student@campus.edu');
                     setPassword('password123');
                   }}
-                  className="text-cyan-400 hover:text-cyan-300 underline font-mono text-[10px]"
+                  className="text-blue-600 hover:text-blue-700 underline font-mono text-[10px]"
                 >
                   Student (Alex)
                 </button>
@@ -274,9 +274,9 @@ export default function Login() {
           </div>
         )}
 
-        <div className="text-center text-xs text-slate-400">
+        <div className="text-center text-xs text-slate-500">
           New user?{' '}
-          <Link to="/signup" className="text-cyan-400 font-semibold hover:underline">
+          <Link to="/signup" className="text-blue-600 font-semibold hover:underline">
             Create an Account
           </Link>
         </div>

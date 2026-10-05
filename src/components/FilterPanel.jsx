@@ -33,15 +33,15 @@ export default function FilterPanel({
   onReset,
 }) {
   return (
-    <div className="space-y-4 p-5 rounded-2xl bg-slate-900 border border-slate-800">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-        <div className="flex items-center space-x-2 text-white font-semibold text-sm">
-          <Filter className="w-4 h-4 text-cyan-400" />
+    <div className="space-y-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center space-x-2 text-slate-900 font-semibold text-sm">
+          <Filter className="w-4 h-4 text-blue-600" />
           <span>Filters & Sort</span>
         </div>
         <button
           onClick={onReset}
-          className="text-xs text-slate-400 hover:text-cyan-400 flex items-center space-x-1 transition"
+          className="text-xs text-slate-500 hover:text-blue-600 flex items-center space-x-1 transition"
         >
           <RotateCcw className="w-3 h-3" />
           <span>Reset</span>
@@ -50,7 +50,7 @@ export default function FilterPanel({
 
       {/* Category Pills */}
       <div>
-        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           Category
         </label>
         <div className="flex flex-wrap gap-1.5">
@@ -60,8 +60,8 @@ export default function FilterPanel({
               onClick={() => onSelectCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                 selectedCategory === cat
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               {cat}
@@ -74,11 +74,11 @@ export default function FilterPanel({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
         {/* Format */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Format</label>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Format</label>
           <select
             value={selectedFormat}
             onChange={(e) => onSelectFormat(e.target.value)}
-            className="w-full py-2 px-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {FORMATS.map((f) => (
               <option key={f} value={f}>
@@ -90,11 +90,11 @@ export default function FilterPanel({
 
         {/* Availability */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Availability</label>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Availability</label>
           <select
             value={selectedAvailability}
             onChange={(e) => onSelectAvailability(e.target.value)}
-            className="w-full py-2 px-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {AVAILABILITIES.map((a) => (
               <option key={a} value={a}>
@@ -106,11 +106,11 @@ export default function FilterPanel({
 
         {/* Sort */}
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Sort By</label>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Sort By</label>
           <select
             value={sortBy}
             onChange={(e) => onSortBy(e.target.value)}
-            className="w-full py-2 px-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full py-2 px-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>

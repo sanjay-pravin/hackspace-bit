@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { registrationService } from '../services/registrationService';
 import { attendanceService } from '../services/attendanceService';
-import { formatDate, formatTime, getCategoryBadgeClass } from '../utils/formatters';
+import { formatDate, formatTime } from '../utils/formatters';
 import { 
   Calendar, 
   MapPin, 
   AlertCircle, 
   CheckCircle2, 
   KeyRound,
-  Users,
-  Building2
+  Users
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import LoadingState from '../components/LoadingState';
@@ -113,14 +112,14 @@ export default function MyRegistrations() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">My Registrations</h1>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">My Registrations</h1>
+        <p className="text-xs text-slate-500 mt-0.5">
           View your confirmed registrations and enter the Venue OTP when you arrive to mark attendance Present.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1.5 border-b border-slate-800/80 pb-2 text-xs">
+      <div className="flex space-x-1.5 border-b border-slate-200 pb-2 text-xs">
         {[
           { key: 'all', label: `All (${registrations.length})` },
           { key: 'confirmed', label: `Upcoming (${registrations.filter(r => r.status === 'confirmed' && !r.hasAttended).length})` },
@@ -132,8 +131,8 @@ export default function MyRegistrations() {
             onClick={() => setFilter(tab.key)}
             className={`px-3 py-1.5 rounded-lg font-medium transition ${
               filter === tab.key
-                ? 'bg-slate-800 text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-blue-600 text-white font-semibold shadow-sm'
+                : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
             }`}
           >
             {tab.label}
@@ -151,7 +150,7 @@ export default function MyRegistrations() {
           action={
             <Link
               to="/events"
-              className="inline-block px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition"
+              className="inline-block px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition shadow-sm"
             >
               Explore Events
             </Link>
@@ -167,50 +166,50 @@ export default function MyRegistrations() {
             return (
               <div
                 key={reg.id}
-                className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-2 max-w-xl">
                   {/* Badges */}
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[11px] font-semibold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">
+                    <span className="font-mono text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       ID: {reg.public_registration_id}
                     </span>
-                    <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-slate-800 text-slate-300">
+                    <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-slate-100 text-slate-700 border border-slate-200">
                       {reg.event?.category}
                     </span>
 
                     {isAttended ? (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 flex items-center space-x-1">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center space-x-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         <span>PRESENT at Venue</span>
                       </span>
                     ) : isCancelled ? (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-red-950/60 text-red-400 border border-red-800/50">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-red-50 text-red-800 border border-red-200">
                         Cancelled
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-950/60 text-indigo-300 border border-indigo-800/50">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                         Registered • Awaiting Venue OTP
                       </span>
                     )}
 
                     {isTeam && (
-                      <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-purple-950/60 text-purple-300 border border-purple-800/50 flex items-center space-x-1">
-                        <Users className="w-3 h-3" />
+                      <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-purple-50 text-purple-800 border border-purple-200 flex items-center space-x-1">
+                        <Users className="w-3 h-3 text-purple-600" />
                         <span>Squad Entry</span>
                       </span>
                     )}
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-bold text-white leading-snug">{reg.event?.title}</h3>
-                    <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-slate-400 mt-1">
+                    <h3 className="text-sm font-bold text-slate-900 leading-snug">{reg.event?.title}</h3>
+                    <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-slate-500 mt-1">
                       <span className="flex items-center space-x-1">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>{formatDate(reg.event?.start_at)} ({formatTime(reg.event?.start_at)})</span>
                       </span>
-                      <span className="flex items-center space-x-1 text-slate-300">
-                        <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="flex items-center space-x-1 text-slate-700">
+                        <MapPin className="w-3.5 h-3.5 text-blue-600" />
                         <span>Venue: <strong>{reg.event?.venue}</strong></span>
                       </span>
                     </div>
@@ -222,7 +221,7 @@ export default function MyRegistrations() {
                   {!isCancelled && !isAttended && (
                     <button
                       onClick={() => handleOpenOtpModal(reg)}
-                      className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center space-x-1.5 shadow-sm"
+                      className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm"
                     >
                       <KeyRound className="w-3.5 h-3.5" />
                       <span>Enter Venue OTP</span>
@@ -232,7 +231,7 @@ export default function MyRegistrations() {
                   {!isCancelled && !isAttended && (
                     <button
                       onClick={() => setCancelTarget(reg)}
-                      className="px-2.5 py-2 rounded-lg text-xs text-slate-400 hover:text-red-400 transition"
+                      className="px-2.5 py-2 rounded-lg text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
                     >
                       Cancel
                     </button>
@@ -252,23 +251,23 @@ export default function MyRegistrations() {
       >
         {otpSuccess ? (
           <div className="py-4 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-white">Attendance Confirmed: PRESENT</h3>
-              <p className="text-xs text-slate-300">
-                You have been marked present at venue: <strong className="text-white">{otpSuccess.venue}</strong>
+              <h3 className="text-base font-bold text-slate-900">Attendance Confirmed: PRESENT</h3>
+              <p className="text-xs text-slate-600">
+                You have been marked present at venue: <strong className="text-slate-900">{otpSuccess.venue}</strong>
               </p>
               {otpSuccess.isTeam && (
-                <p className="text-xs text-purple-300">
+                <p className="text-xs text-purple-700">
                   Squad attendance mapped for: <strong>{otpSuccess.teamName || 'Your Squad'}</strong>
                 </p>
               )}
             </div>
             <button
               onClick={() => setOtpTarget(null)}
-              className="mt-2 w-full py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white"
+              className="mt-2 w-full py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800"
             >
               Done
             </button>
@@ -276,27 +275,27 @@ export default function MyRegistrations() {
         ) : (
           <form onSubmit={handleOtpCheckIn} className="space-y-4">
             {otpError && (
-              <div className="p-3 rounded-lg bg-red-950/40 border border-red-500/30 text-xs text-red-300 flex items-center space-x-2">
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 flex items-center space-x-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{otpError}</span>
               </div>
             )}
 
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-1">
-              <p className="font-semibold text-white">{otpTarget?.event?.title}</p>
-              <div className="flex items-center space-x-1.5 text-cyan-400">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1 text-slate-700">
+              <p className="font-semibold text-slate-900">{otpTarget?.event?.title}</p>
+              <div className="flex items-center space-x-1.5 text-blue-600">
                 <MapPin className="w-3.5 h-3.5" />
                 <span>Mapped Venue: <strong>{otpTarget?.event?.venue}</strong></span>
               </div>
               {otpTarget?.registration_type === 'team' && (
-                <p className="text-purple-300 text-[11px] pt-0.5">
+                <p className="text-purple-700 text-[11px] pt-0.5">
                   * Squad registration: Entering this OTP marks the entire team present at the venue.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Enter 6-Digit Venue Check-in OTP *
               </label>
               <input
@@ -306,12 +305,12 @@ export default function MyRegistrations() {
                 value={enteredOtp}
                 onChange={(e) => setEnteredOtp(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="e.g. 849201"
-                className="w-full py-2.5 px-3 rounded-lg bg-slate-950 border border-slate-700 text-center font-mono text-xl tracking-widest text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full py-2.5 px-3 rounded-lg bg-white border border-slate-300 text-center font-mono text-xl tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                 <span>Look for the 6-digit code displayed at the entrance</span>
                 {otpTarget?.event?.venue_otp && (
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className="text-[10px] text-slate-500 font-mono">
                     Code: {otpTarget.event.venue_otp}
                   </span>
                 )}
@@ -322,14 +321,14 @@ export default function MyRegistrations() {
               <button
                 type="button"
                 onClick={() => setOtpTarget(null)}
-                className="px-3 py-1.5 text-xs text-slate-400 hover:text-white"
+                className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={verifyingOtp || enteredOtp.length !== 6}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition disabled:opacity-50"
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition disabled:opacity-50 shadow-sm"
               >
                 {verifyingOtp ? 'Verifying...' : 'Mark Present at Venue'}
               </button>
@@ -344,21 +343,21 @@ export default function MyRegistrations() {
         onClose={() => setCancelTarget(null)}
         title="Cancel Registration"
       >
-        <div className="space-y-3 text-xs text-slate-300">
+        <div className="space-y-3 text-xs text-slate-700">
           <p>
-            Cancel registration for <strong className="text-white">{cancelTarget?.event?.title}</strong>? Your slot will be released for other students.
+            Cancel registration for <strong className="text-slate-900">{cancelTarget?.event?.title}</strong>? Your slot will be released for other students.
           </p>
           <div className="flex justify-end space-x-2 pt-2">
             <button
               onClick={() => setCancelTarget(null)}
-              className="px-3 py-1.5 text-slate-400 hover:text-white"
+              className="px-3 py-1.5 text-slate-500 hover:text-slate-700"
             >
               Keep
             </button>
             <button
               onClick={handleConfirmCancel}
               disabled={cancelling}
-              className="px-3 py-1.5 rounded-lg font-semibold bg-red-600 hover:bg-red-500 text-white transition"
+              className="px-3 py-1.5 rounded-lg font-semibold bg-red-600 hover:bg-red-700 text-white transition shadow-sm"
             >
               {cancelling ? 'Cancelling...' : 'Confirm'}
             </button>

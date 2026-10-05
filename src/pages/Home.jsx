@@ -69,27 +69,27 @@ export default function Home() {
 
   return (
     <div className="space-y-16 pb-16">
-      {/* Subtle Hero */}
-      <section className="relative pt-16 pb-10">
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-12 bg-gradient-to-b from-blue-50/50 to-transparent">
         <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-xs text-slate-600 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
             <span>Vision Builders • HACKSPACE Hackathon</span>
           </div>
 
           <div className="space-y-3">
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
               Every Campus Event. <br />
-              <span className="text-cyan-400">One Connected Campus.</span>
+              <span className="text-blue-600">One Connected Campus.</span>
             </h1>
-            <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
               Discover hackathons, technical workshops, and campus activities. Register individually or as a squad, then mark attendance Present using Venue OTP codes.
             </p>
           </div>
 
           {/* Quick Search */}
-          <form onSubmit={handleHeroSearch} className="max-w-lg mx-auto flex items-center p-1.5 rounded-xl bg-slate-900 border border-slate-800 focus-within:border-slate-700 transition">
-            <div className="pl-3 text-slate-500">
+          <form onSubmit={handleHeroSearch} className="max-w-lg mx-auto flex items-center p-1.5 rounded-xl bg-white border border-slate-300 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition">
+            <div className="pl-3 text-slate-400">
               <Search className="w-4 h-4" />
             </div>
             <input
@@ -97,114 +97,113 @@ export default function Home() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search hackathons, workshops, or organizers..."
-              className="flex-1 bg-transparent px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
+              className="flex-1 bg-transparent px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
             />
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center space-x-1"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white shadow-sm transition"
             >
-              <span>Search</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              Search
             </button>
           </form>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+          {/* Primary Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               to="/events"
-              className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-950 transition flex items-center space-x-1.5"
+              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition"
             >
               <span>Explore All Events</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
-
-            {user ? (
-              <Link
-                to="/student/registrations"
-                className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition"
-              >
-                View My Registrations
-              </Link>
-            ) : (
+            {!user && (
               <Link
                 to="/signup"
-                className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition"
+                className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm transition"
               >
-                Create Student Account
+                <span>Student Sign Up</span>
               </Link>
             )}
           </div>
-
-          {/* Telemetry banner */}
-          {stats && (
-            <div className="pt-8 max-w-3xl mx-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center">
-                <div className="p-2">
-                  <p className="text-xl font-bold text-white">{stats.totalEvents}</p>
-                  <p className="text-[10px] uppercase font-semibold text-slate-400 mt-0.5">Campus Events</p>
-                </div>
-                <div className="p-2 border-l border-slate-800">
-                  <p className="text-xl font-bold text-indigo-400">{stats.totalRegistrations}</p>
-                  <p className="text-[10px] uppercase font-semibold text-slate-400 mt-0.5">Registrations</p>
-                </div>
-                <div className="p-2 border-l border-slate-800">
-                  <p className="text-xl font-bold text-cyan-400">{stats.attendanceCount}</p>
-                  <p className="text-[10px] uppercase font-semibold text-slate-400 mt-0.5">Checked In</p>
-                </div>
-                <div className="p-2 border-l border-slate-800">
-                  <p className="text-xl font-bold text-emerald-400">{stats.attendanceRate}%</p>
-                  <p className="text-[10px] uppercase font-semibold text-slate-400 mt-0.5">Turnout</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Featured Events */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-white">Featured Campus Events</h2>
-            <p className="text-xs text-slate-400">Highlighted hackathons and masterclasses</p>
+      {/* Stats Counter Strip */}
+      {stats && (
+        <section className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div className="text-center p-3">
+              <p className="text-2xl sm:text-3xl font-extrabold text-blue-600">{stats.totalEvents}</p>
+              <p className="text-xs text-slate-500 mt-1">Campus Events</p>
+            </div>
+            <div className="text-center p-3">
+              <p className="text-2xl sm:text-3xl font-extrabold text-slate-800">{stats.totalRegistrations}</p>
+              <p className="text-xs text-slate-500 mt-1">Registrations</p>
+            </div>
+            <div className="text-center p-3">
+              <p className="text-2xl sm:text-3xl font-extrabold text-purple-600">{stats.activeTeams}</p>
+              <p className="text-xs text-slate-500 mt-1">Active Squads</p>
+            </div>
+            <div className="text-center p-3">
+              <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600">{stats.attendedTotal}</p>
+              <p className="text-xs text-slate-500 mt-1">Verified Attendances</p>
+            </div>
           </div>
-          <Link to="/events" className="text-xs text-cyan-400 hover:underline flex items-center space-x-1">
-            <span>View all</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+        </section>
+      )}
 
-        {loading ? (
-          <LoadingState message="Loading events..." />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* Featured Events */}
+      {featuredEvents.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Featured Highlights</h2>
+              <p className="text-xs text-slate-500">Flagship hackathons and premier campus gatherings</p>
+            </div>
+            <Link
+              to="/events"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center space-x-1"
+            >
+              <span>View all</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {featuredEvents.map((evt) => (
               <EventCard key={evt.id} event={evt} />
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Categories Explorer */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+      {/* Browse by Category */}
+      <section className="max-w-6xl mx-auto px-4 space-y-6">
         <div>
-          <h2 className="text-lg font-bold text-white">Event Categories</h2>
-          <p className="text-xs text-slate-400">Filter through department and club offerings</p>
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Browse by Category</h2>
+          <p className="text-xs text-slate-500">Explore technical, competitive, and cultural opportunities</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
               <Link
                 key={cat.name}
-                to={`/events?category=${encodeURIComponent(cat.name === 'Hackathons' ? 'Hackathon' : cat.name.replace(/s$/, ''))}`}
-                className="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition space-y-2 text-center"
+                to={`/events?category=${encodeURIComponent(cat.name)}`}
+                className="group p-5 rounded-2xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md transition text-left space-y-3"
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-800 text-cyan-400 flex items-center justify-center mx-auto">
-                  <Icon className="w-4 h-4" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center transition group-hover:bg-blue-600 group-hover:text-white">
+                  <Icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-xs font-semibold text-white">{cat.name}</h3>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition">
+                    {cat.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    {cat.desc}
+                  </p>
+                </div>
               </Link>
             );
           })}
@@ -212,55 +211,64 @@ export default function Home() {
       </section>
 
       {/* Upcoming Events */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+      <section className="max-w-6xl mx-auto px-4 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-white">Upcoming Events</h2>
-            <p className="text-xs text-slate-400">Reserve your spot before deadlines close</p>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">Upcoming Events</h2>
+            <p className="text-xs text-slate-500">Upcoming sessions opening for registration</p>
           </div>
-          <Link to="/events" className="text-xs text-cyan-400 hover:underline flex items-center space-x-1">
-            <span>Explore full catalog</span>
+          <Link
+            to="/events"
+            className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center space-x-1"
+          >
+            <span>See full calendar</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {upcomingEvents.map((evt) => (
-            <EventCard key={evt.id} event={evt} />
-          ))}
-        </div>
+        {loading ? (
+          <LoadingState message="Loading events..." />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {upcomingEvents.map((evt) => (
+              <EventCard key={evt.id} event={evt} />
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* How Venue OTP Works */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
-          <div className="space-y-1">
-            <h2 className="text-lg font-bold text-white">How Attendance Works at the Venue</h2>
-            <p className="text-xs text-slate-400">Simple three-step check-in without paper lists or delays.</p>
+      {/* How it Works Banner */}
+      <section className="max-w-6xl mx-auto px-4">
+        <div className="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-6">
+          <div className="max-w-2xl">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">How Attendance Works</h2>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              Simple 3-step process designed for fast, seamless participation.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-              <span className="text-xs font-mono text-cyan-400 font-bold">01</span>
-              <h3 className="text-xs font-bold text-white">Register Solo or Squad</h3>
-              <p className="text-xs text-slate-400">
-                Register individually or create a squad with an invitation code. Seat capacity updates instantly.
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
+              <h4 className="text-xs font-bold text-slate-900">Discover & Register</h4>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Check skill prerequisites or FCFS criteria and register in 1-click.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-              <span className="text-xs font-mono text-indigo-400 font-bold">02</span>
-              <h3 className="text-xs font-bold text-white">Arrive at Event Venue</h3>
-              <p className="text-xs text-slate-400">
-                Head to the assigned campus hall or lab. Organizers display the active 6-digit Venue OTP at the entrance.
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">2</span>
+              <h4 className="text-xs font-bold text-slate-900">Arrive at Venue</h4>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Arrive at the event hall or lab indicated on your registration.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-              <span className="text-xs font-mono text-emerald-400 font-bold">03</span>
-              <h3 className="text-xs font-bold text-white">Enter OTP & Mark Present</h3>
-              <p className="text-xs text-slate-400">
-                Type the Venue OTP into your registrations page to record attendance as Present mapped to the venue.
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">3</span>
+              <h4 className="text-xs font-bold text-slate-900">Enter Venue OTP</h4>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Organizers display the live venue code — enter it to mark attendance Present instantly.
               </p>
             </div>
           </div>

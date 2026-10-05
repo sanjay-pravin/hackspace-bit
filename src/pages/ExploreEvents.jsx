@@ -6,7 +6,7 @@ import SearchBar from '../components/SearchBar';
 import FilterPanel from '../components/FilterPanel';
 import LoadingState from '../components/LoadingState';
 import EmptyState from '../components/EmptyState';
-import { Calendar, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Calendar, SlidersHorizontal } from 'lucide-react';
 
 export default function ExploreEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,14 +62,14 @@ export default function ExploreEvents() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-1.5 text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+        <div className="inline-flex items-center space-x-1.5 text-xs font-semibold text-blue-600 uppercase tracking-wider">
           <Calendar className="w-3.5 h-3.5" />
           <span>Campus Directory</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
           Explore Campus Events
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+        <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
           Browse upcoming hackathons, competitive challenges, and workshops. Real-time capacity tracked directly against the database.
         </p>
       </div>
@@ -90,8 +90,8 @@ export default function ExploreEvents() {
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition ${
             showFilters
-              ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30'
-              : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
           }`}
         >
           <SlidersHorizontal className="w-4 h-4" />
@@ -118,56 +118,52 @@ export default function ExploreEvents() {
             setVisibleCount(6);
           }}
           sortBy={sortBy}
-          onSortBy={(s) => {
-            setSortBy(s);
-            setVisibleCount(6);
-          }}
+          onSortBy={(s) => setSortBy(s)}
           onReset={handleResetFilters}
         />
       )}
 
-      {/* Result Metrics */}
-      <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-3">
-        <span>
-          Showing <strong className="text-white">{events.length}</strong> matching event{events.length === 1 ? '' : 's'}
-        </span>
-        {category !== 'All' && (
-          <span className="px-2 py-0.5 rounded bg-slate-800 text-cyan-400 font-medium">
-            Category: {category}
-          </span>
+      {/* Active Filter Indicators */}
+      <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200">
+        <div>
+          Showing <span className="font-semibold text-slate-800">{visibleEvents.length}</span> of{' '}
+          <span className="font-semibold text-slate-800">{events.length}</span> events
+        </div>
+        {(category !== 'All' || format !== 'All' || availability !== 'All' || search) && (
+          <button
+            onClick={handleResetFilters}
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Clear active filters
+          </button>
         )}
       </div>
 
-      {/* Events Grid */}
+      {/* Event Grid */}
       {loading ? (
-        <LoadingState message="Querying active campus database..." />
+        <div className="py-16">
+          <LoadingState message="Filtering campus events..." />
+        </div>
       ) : events.length === 0 ? (
         <EmptyState
-          title="No events match your criteria"
-          description="Try broadening your category filter or search keywords."
-          action={
-            <button
-              onClick={handleResetFilters}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition"
-            >
-              Reset All Filters
-            </button>
-          }
+          title="No campus events found"
+          message="Try changing your search term, category filters, or availability selection."
+          actionText="Reset All Filters"
+          onAction={handleResetFilters}
         />
       ) : (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {visibleEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
 
-          {/* Load More Button */}
           {visibleCount < events.length && (
-            <div className="pt-4 text-center">
+            <div className="text-center pt-4">
               <button
                 onClick={handleLoadMore}
-                className="px-6 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition shadow-md"
+                className="px-6 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm transition"
               >
                 Load More Events ({events.length - visibleCount} remaining)
               </button>
