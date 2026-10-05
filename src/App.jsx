@@ -31,6 +31,9 @@ import Attendance from './pages/Attendance';
 // Protected Route Guard
 import ProtectedRoute from './components/ProtectedRoute';
 
+// AI Event Assistant Chatbot
+import AIChatBot from './components/AIChatBot';
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -84,6 +87,9 @@ export default function App() {
               <Route path="/admin/attendance" element={<Attendance />} />
             </Route>
           </Routes>
+
+          {/* Global Floating AI Event Assistant Chatbot */}
+          <AIChatBot />
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
