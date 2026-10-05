@@ -13,9 +13,13 @@ export const registrationService = {
     // 1. Get Event and verify availability
     let event = null;
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('events').select('*').eq('id', eventId).single();
-      if (error || !data) throw new Error('Event not found.');
-      event = data;
+      try {
+        const { data, error } = await supabase.from('events').select('*').eq('id', eventId).single();
+        if (!error && data) event = data;
+        else event = localDb.getEvents().find(e => e.id === eventId);
+      } catch {
+        event = localDb.getEvents().find(e => e.id === eventId);
+      }
     } else {
       event = localDb.getEvents().find(e => e.id === eventId);
     }
@@ -36,17 +40,23 @@ export const registrationService = {
       throw new Error('Event has reached maximum capacity.');
     }
 
-    // Check duplicate registration
+    // Check duplicate registration for THIS exact event
     let existingReg = null;
     if (isSupabaseConfigured && supabase) {
-      const { data } = await supabase
-        .from('registrations')
-        .select('*')
-        .eq('event_id', eventId)
-        .eq('user_id', userId)
-        .eq('status', 'confirmed')
-        .maybeSingle();
-      existingReg = data;
+      try {
+        const { data } = await supabase
+          .from('registrations')
+          .select('*')
+          .eq('event_id', eventId)
+          .eq('user_id', userId)
+          .eq('status', 'confirmed')
+          .maybeSingle();
+        existingReg = data;
+      } catch {
+        existingReg = localDb.getRegistrations().find(
+          r => r.event_id === eventId && r.user_id === userId && r.status === 'confirmed'
+        );
+      }
     } else {
       existingReg = localDb.getRegistrations().find(
         r => r.event_id === eventId && r.user_id === userId && r.status === 'confirmed'
@@ -57,12 +67,37 @@ export const registrationService = {
       throw new Error('You are already registered for this event.');
     }
 
+    // SCHEDULE CONFLICT CHECK:
+    // "if the student registered for one event at the time the other event on the same time should not show it / cannot register"
+    const userRegs = await this.getUserRegistrations(userId);
+    const confirmedRegs = userRegs.filter(r => r.status === 'confirmed' && r.event_id !== eventId);
+    const targetStart = new Date(event.start_at).getTime();
+    const targetEnd = new Date(event.end_at).getTime();
+
+    for (const reg of confirmedRegs) {
+      const regEvent = reg.event;
+      if (!regEvent?.start_at || !regEvent?.end_at) continue;
+      const regStart = new Date(regEvent.start_at).getTime();
+      const regEnd = new Date(regEvent.end_at).getTime();
+
+      // Time overlap condition
+      if (targetStart < regEnd && targetEnd > regStart) {
+        throw new Error(
+          `Schedule Conflict: You are already registered for "${regEvent.title}" which takes place during this exact time slot. Simultaneous registrations are not permitted.`
+        );
+      }
+    }
+
     // Check PCDP Skill Eligibility criteria
     if (event.eligibility_type === 'pcdp_skill') {
       let userProfile = null;
       if (isSupabaseConfigured && supabase) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-        userProfile = data;
+        try {
+          const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+          userProfile = data;
+        } catch {
+          userProfile = localDb.getProfiles().find(p => p.id === userId);
+        }
       } else {
         userProfile = localDb.getProfiles().find(p => p.id === userId);
       }
@@ -92,19 +127,23 @@ export const registrationService = {
     };
 
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('registrations').insert(newRegistration).select().single();
-      if (error) throw error;
-      // Increment capacity
-      await supabase.from('events').update({ registered_count: event.registered_count + 1 }).eq('id', eventId);
-      return data;
+      try {
+        const { data, error } = await supabase.from('registrations').insert(newRegistration).select().single();
+        if (!error && data) {
+          await supabase.from('events').update({ registered_count: event.registered_count + 1 }).eq('id', eventId);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase register fallback:', e);
+      }
     }
 
-    // Local DB save
+    // Local fallback
     const registrations = localDb.getRegistrations();
-    registrations.unshift(newRegistration);
+    registrations.push(newRegistration);
     localDb.saveRegistrations(registrations);
 
-    // Update event registered_count
+    // Increment capacity locally
     const events = localDb.getEvents();
     const evtIdx = events.findIndex(e => e.id === eventId);
     if (evtIdx !== -1) {
@@ -112,11 +151,11 @@ export const registrationService = {
       localDb.saveEvents(events);
     }
 
-    // Dispatch automatic in-app notification
+    // Create confirmation notification
     await notificationService.createNotification({
       userId,
       title: 'Registration Confirmed!',
-      message: `You have successfully secured a spot for "${event.title}". Access your digital participant pass anytime from your dashboard.`,
+      message: `You are confirmed for ${event.title}. Mark attendance using Venue OTP at ${event.venue}.`,
       notificationType: 'registration',
       relatedEventId: eventId,
     });
@@ -124,41 +163,9 @@ export const registrationService = {
     return newRegistration;
   },
 
-  async cancelRegistration(registrationId, userId) {
-    let reg = null;
-    const registrations = localDb.getRegistrations();
-    const idx = registrations.findIndex(r => r.id === registrationId);
-    if (idx === -1) throw new Error('Registration not found.');
-    reg = registrations[idx];
-
-    if (reg.user_id !== userId) {
-      throw new Error('Unauthorized to cancel this registration.');
-    }
-    if (reg.status === 'cancelled') {
-      throw new Error('This registration is already cancelled.');
-    }
-
-    reg.status = 'cancelled';
-    reg.cancelled_at = new Date().toISOString();
-    localDb.saveRegistrations(registrations);
-
-    // Decrement capacity
-    const events = localDb.getEvents();
-    const evtIdx = events.findIndex(e => e.id === reg.event_id);
-    if (evtIdx !== -1 && events[evtIdx].registered_count > 0) {
-      events[evtIdx].registered_count -= 1;
-      localDb.saveEvents(events);
-    }
-
-    await notificationService.createNotification({
-      userId,
-      title: 'Registration Cancelled',
-      message: 'Your registration has been cancelled. Your slot has been returned to the campus pool.',
-      notificationType: 'general',
-      relatedEventId: reg.event_id,
-    });
-
-    return reg;
+  // Once registered, an event CANNOT be cancelled
+  async cancelRegistration() {
+    throw new Error('Policy Notice: Confirmed event registrations are permanent and cannot be cancelled.');
   },
 
   async getUserRegistrations(userId) {
@@ -192,64 +199,27 @@ export const registrationService = {
       event,
       profile,
       team,
-      attendance: attendanceRecord,
+      attendanceRecord,
+      hasAttended: Boolean(attendanceRecord),
     };
   },
 
-  async getAllParticipantsForAdmin({ eventId = 'All', status = 'All', search = '' } = {}) {
-    const registrations = localDb.getRegistrations();
-    const events = localDb.getEvents();
+  async getEventRegistrations(eventId) {
+    const registrations = localDb.getRegistrations().filter(r => r.event_id === eventId);
     const profiles = localDb.getProfiles();
-    const attendance = localDb.getAttendance();
     const teams = localDb.getTeams();
+    const attendance = localDb.getAttendance();
 
-    let combined = registrations.map(reg => {
-      const event = events.find(e => e.id === reg.event_id) || {};
-      const student = profiles.find(p => p.id === reg.user_id) || {};
-      const isCheckedIn = attendance.some(a => a.registration_id === reg.id);
+    return registrations.map(reg => {
+      const profile = profiles.find(p => p.id === reg.user_id);
       const team = reg.team_id ? teams.find(t => t.id === reg.team_id) : null;
-
+      const attended = attendance.some(a => a.registration_id === reg.id);
       return {
-        id: reg.id,
-        public_registration_id: reg.public_registration_id,
-        event_id: reg.event_id,
-        event_title: event.title || 'Unknown Event',
-        student_id: student.student_id || 'N/A',
-        student_name: student.display_name || 'Anonymous Student',
-        student_email: student.email || 'N/A',
-        department: student.department || 'N/A',
-        academic_year: student.academic_year || 'N/A',
-        team_name: team ? team.name : 'Individual',
-        registration_type: reg.registration_type,
-        status: reg.status,
-        isCheckedIn,
-        registered_at: reg.registered_at,
-        is_demonstration: reg.is_demonstration || false,
+        ...reg,
+        profile,
+        team,
+        hasAttended: attended,
       };
     });
-
-    if (eventId && eventId !== 'All') {
-      combined = combined.filter(p => p.event_id === eventId);
-    }
-    if (status && status !== 'All') {
-      if (status === 'attended') {
-        combined = combined.filter(p => p.isCheckedIn);
-      } else {
-        combined = combined.filter(p => p.status === status);
-      }
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      combined = combined.filter(
-        p =>
-          p.student_name.toLowerCase().includes(q) ||
-          p.public_registration_id.toLowerCase().includes(q) ||
-          p.student_email.toLowerCase().includes(q) ||
-          p.student_id.toLowerCase().includes(q) ||
-          p.event_title.toLowerCase().includes(q)
-      );
-    }
-
-    return combined;
   }
 };

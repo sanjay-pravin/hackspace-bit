@@ -10,7 +10,8 @@ import {
   Lock,
   UserCheck,
   GraduationCap,
-  ExternalLink
+  ExternalLink,
+  Clock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { eventService } from '../services/eventService';
@@ -83,10 +84,11 @@ export default function EventDetails() {
     );
   }
 
+  const timeConflict = user && event ? eventService.checkEventTimeConflict(event.id, user.id) : { hasConflict: false };
   const isPastDeadline = new Date(event.registration_deadline) < new Date();
   const isFull = (event.registered_count || 0) >= event.capacity;
   const isCancelled = event.status === 'cancelled';
-  const canRegister = !isPastDeadline && !isFull && !isCancelled && !existingReg;
+  const canRegister = !isPastDeadline && !isFull && !isCancelled && !existingReg && !timeConflict.hasConflict;
   const allowsTeams = event.maximum_team_size > 1;
   const remainingSlots = Math.max(0, event.capacity - (event.registered_count || 0));
   const eligibility = pcdpService.checkEventEligibility(event, user);
@@ -94,6 +96,11 @@ export default function EventDetails() {
   const handleOpenRegister = () => {
     if (!user) {
       navigate('/login', { state: { returnTo: `/events/${slug}` } });
+      return;
+    }
+    const conflict = eventService.checkEventTimeConflict(event.id, user.id);
+    if (conflict.hasConflict) {
+      alert(`Schedule Conflict: You are already confirmed for "${conflict.conflictingEvent?.title}" during this time window. Overlapping registrations are not permitted.`);
       return;
     }
     const check = pcdpService.checkEventEligibility(event, user);
@@ -152,6 +159,20 @@ export default function EventDetails() {
         <ArrowLeft className="w-4 h-4" />
         <span>Back to Events</span>
       </Link>
+
+      {/* Time Conflict Banner (Top) */}
+      {timeConflict.hasConflict && !existingReg && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 space-y-1">
+          <div className="flex items-center space-x-2 font-bold text-sm text-amber-800">
+            <Clock className="w-4 h-4 text-amber-600" />
+            <span>Time Conflict Alert</span>
+          </div>
+          <p className="text-xs text-amber-800">
+            You cannot register for this event because you are already registered for{' '}
+            <strong>{timeConflict.conflictingEvent?.title}</strong> which takes place during the same time window.
+          </p>
+        </div>
+      )}
 
       {/* Poster */}
       <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
@@ -359,6 +380,22 @@ export default function EventDetails() {
                 >
                   Enter Venue OTP in My Registrations
                 </Link>
+                <p className="text-[10px] text-slate-500 italic pt-1">
+                  Registration is confirmed and permanent.
+                </p>
+              </div>
+            ) : timeConflict.hasConflict ? (
+              <div className="space-y-2">
+                <button
+                  disabled
+                  className="w-full py-2.5 px-4 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 cursor-not-allowed border border-amber-300 flex items-center justify-center space-x-1.5"
+                >
+                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Time Conflict: Already Booked</span>
+                </button>
+                <p className="text-[11px] text-amber-700 text-center">
+                  You are registered for <strong>{timeConflict.conflictingEvent?.title}</strong> during this exact time.
+                </p>
               </div>
             ) : canRegister ? (
               <button
@@ -378,7 +415,7 @@ export default function EventDetails() {
             )}
 
             <p className="text-[10px] text-slate-500 text-center">
-              Attendance will be verified directly at {event.venue} using the Venue OTP.
+              Registrations are permanent once confirmed. Attendance is verified directly at {event.venue} using the Venue OTP.
             </p>
           </div>
         </div>
@@ -408,6 +445,9 @@ export default function EventDetails() {
               </p>
               <p className="text-xs text-slate-600 pt-1">
                 When you arrive at <strong>{event.venue}</strong>, check in using the Venue OTP.
+              </p>
+              <p className="text-[11px] text-slate-400 italic">
+                Note: Confirmed registrations cannot be cancelled.
               </p>
             </div>
             <div className="pt-2 flex gap-2">
@@ -481,6 +521,9 @@ export default function EventDetails() {
               <p><strong>Registrant:</strong> {user?.display_name}</p>
               <p><strong>Email:</strong> {user?.email}</p>
               <p><strong>Venue:</strong> {event.venue}</p>
+              <p className="text-amber-800 text-[11px] pt-1">
+                <strong>Policy:</strong> Confirmed registrations are permanent and cannot be cancelled.
+              </p>
             </div>
 
             <div className="flex justify-end space-x-2 pt-1">

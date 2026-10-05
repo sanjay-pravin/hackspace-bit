@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { eventService } from '../services/eventService';
+import { useAuth } from '../context/AuthContext';
 import EventCard from '../components/EventCard';
 import SearchBar from '../components/SearchBar';
 import FilterPanel from '../components/FilterPanel';
 import LoadingState from '../components/LoadingState';
 import EmptyState from '../components/EmptyState';
-import { Calendar, SlidersHorizontal } from 'lucide-react';
+import { Calendar, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 
 export default function ExploreEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
@@ -32,6 +34,7 @@ export default function ExploreEvents() {
           format,
           availability,
           sortBy,
+          userId: user?.id || null,
         });
         setEvents(results);
       } catch (err) {
@@ -41,7 +44,7 @@ export default function ExploreEvents() {
       }
     }
     fetchEvents();
-  }, [search, category, format, availability, sortBy]);
+  }, [search, category, format, availability, sortBy, user?.id]);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -72,6 +75,12 @@ export default function ExploreEvents() {
         <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
           Browse upcoming hackathons, competitive challenges, and workshops. Real-time capacity tracked directly against the database.
         </p>
+        {user && (
+          <div className="inline-flex items-center space-x-2 text-[11px] text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span>Time-conflict shield active: Overlapping events for your registered slots are filtered out automatically.</span>
+          </div>
+        )}
       </div>
 
       {/* Search and Toggle Row */}

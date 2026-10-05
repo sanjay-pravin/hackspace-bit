@@ -10,7 +10,8 @@ import {
   AlertCircle, 
   CheckCircle2, 
   KeyRound,
-  Users
+  Users,
+  ShieldCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import LoadingState from '../components/LoadingState';
@@ -22,10 +23,6 @@ export default function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
-
-  // Cancellation Modal
-  const [cancelTarget, setCancelTarget] = useState(null);
-  const [cancelling, setCancelling] = useState(false);
 
   // Venue OTP Check-in Modal
   const [otpTarget, setOtpTarget] = useState(null);
@@ -50,20 +47,6 @@ export default function MyRegistrations() {
   useEffect(() => {
     loadData();
   }, [user]);
-
-  const handleConfirmCancel = async () => {
-    if (!cancelTarget || !user) return;
-    setCancelling(true);
-    try {
-      await registrationService.cancelRegistration(cancelTarget.id, user.id);
-      setCancelTarget(null);
-      await loadData();
-    } catch (err) {
-      alert(err.message || 'Failed to cancel registration');
-    } finally {
-      setCancelling(false);
-    }
-  };
 
   const handleOpenOtpModal = (reg) => {
     setOtpTarget(reg);
@@ -104,7 +87,6 @@ export default function MyRegistrations() {
     const isAttended = r.hasAttended || r.status === 'attended';
     if (filter === 'confirmed') return r.status === 'confirmed' && !isAttended;
     if (filter === 'attended') return isAttended;
-    if (filter === 'cancelled') return r.status === 'cancelled';
     return true;
   });
 
@@ -118,13 +100,18 @@ export default function MyRegistrations() {
         </p>
       </div>
 
+      {/* Policy Notice: Permanent Registrations */}
+      <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 flex items-center space-x-2">
+        <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+        <span>Confirmed registrations are final and permanent to ensure accurate venue capacity allocation.</span>
+      </div>
+
       {/* Tabs */}
       <div className="flex space-x-1.5 border-b border-slate-200 pb-2 text-xs">
         {[
-          { key: 'all', label: `All (${registrations.length})` },
+          { key: 'all', label: `All Active (${registrations.length})` },
           { key: 'confirmed', label: `Upcoming (${registrations.filter(r => r.status === 'confirmed' && !r.hasAttended).length})` },
           { key: 'attended', label: `Present at Venue (${registrations.filter(r => r.hasAttended || r.status === 'attended').length})` },
-          { key: 'cancelled', label: `Cancelled (${registrations.filter(r => r.status === 'cancelled').length})` },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -159,7 +146,6 @@ export default function MyRegistrations() {
       ) : (
         <div className="space-y-3">
           {filteredRegistrations.map((reg) => {
-            const isCancelled = reg.status === 'cancelled';
             const isAttended = reg.hasAttended || reg.status === 'attended';
             const isTeam = reg.registration_type === 'team' || Boolean(reg.team_id);
 
@@ -182,10 +168,6 @@ export default function MyRegistrations() {
                       <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center space-x-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         <span>PRESENT at Venue</span>
-                      </span>
-                    ) : isCancelled ? (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-red-50 text-red-800 border border-red-200">
-                        Cancelled
                       </span>
                     ) : (
                       <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -216,9 +198,9 @@ export default function MyRegistrations() {
                   </div>
                 </div>
 
-                {/* Clean Actions without pass option */}
+                {/* Actions: Direct Venue OTP check-in */}
                 <div className="flex items-center space-x-2 shrink-0">
-                  {!isCancelled && !isAttended && (
+                  {!isAttended && (
                     <button
                       onClick={() => handleOpenOtpModal(reg)}
                       className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm"
@@ -227,14 +209,10 @@ export default function MyRegistrations() {
                       <span>Enter Venue OTP</span>
                     </button>
                   )}
-
-                  {!isCancelled && !isAttended && (
-                    <button
-                      onClick={() => setCancelTarget(reg)}
-                      className="px-2.5 py-2 rounded-lg text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
-                    >
-                      Cancel
-                    </button>
+                  {isAttended && (
+                    <span className="text-xs text-emerald-700 font-semibold px-2 py-1 bg-emerald-50 rounded-lg border border-emerald-200">
+                      Attendance Recorded
+                    </span>
                   )}
                 </div>
               </div>
@@ -335,34 +313,6 @@ export default function MyRegistrations() {
             </div>
           </form>
         )}
-      </Modal>
-
-      {/* Cancellation Modal */}
-      <Modal
-        isOpen={Boolean(cancelTarget)}
-        onClose={() => setCancelTarget(null)}
-        title="Cancel Registration"
-      >
-        <div className="space-y-3 text-xs text-slate-700">
-          <p>
-            Cancel registration for <strong className="text-slate-900">{cancelTarget?.event?.title}</strong>? Your slot will be released for other students.
-          </p>
-          <div className="flex justify-end space-x-2 pt-2">
-            <button
-              onClick={() => setCancelTarget(null)}
-              className="px-3 py-1.5 text-slate-500 hover:text-slate-700"
-            >
-              Keep
-            </button>
-            <button
-              onClick={handleConfirmCancel}
-              disabled={cancelling}
-              className="px-3 py-1.5 rounded-lg font-semibold bg-red-600 hover:bg-red-700 text-white transition shadow-sm"
-            >
-              {cancelling ? 'Cancelling...' : 'Confirm'}
-            </button>
-          </div>
-        </div>
       </Modal>
     </div>
   );

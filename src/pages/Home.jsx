@@ -13,7 +13,8 @@ import {
   Palette, 
   Award,
   KeyRound,
-  MapPin
+  MapPin,
+  ShieldCheck
 } from 'lucide-react';
 import { eventService } from '../services/eventService';
 import { useAuth } from '../context/AuthContext';
@@ -42,8 +43,8 @@ export default function Home() {
     async function loadData() {
       try {
         const [featured, allEvents, liveStats] = await Promise.all([
-          eventService.getFeaturedEvents(),
-          eventService.getEvents({ sortBy: 'upcoming' }),
+          eventService.getFeaturedEvents(user?.id || null),
+          eventService.getEvents({ sortBy: 'upcoming', userId: user?.id || null }),
           eventService.getLiveStats(),
         ]);
         setFeaturedEvents(featured);
@@ -56,7 +57,7 @@ export default function Home() {
       }
     }
     loadData();
-  }, []);
+  }, [user?.id]);
 
   const handleHeroSearch = (e) => {
     e.preventDefault();

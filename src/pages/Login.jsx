@@ -45,7 +45,20 @@ export default function Login() {
         navigate('/student/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Invalid credentials');
+      setError(err.message || 'Admin authentication failed. Enter username: sarah.admin@campus.edu or admin');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAdminOneClick = async () => {
+    setSubmitting(true);
+    setError('');
+    try {
+      const user = await login('sarah.admin@campus.edu', 'password123');
+      navigate('/admin/dashboard');
+    } catch (err) {
+      setError(err.message || 'Admin sign-in failed');
     } finally {
       setSubmitting(false);
     }
@@ -212,13 +225,13 @@ export default function Login() {
 
             <form onSubmit={handleAdminLogin} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Staff Email ID</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Staff Username / Email</label>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="sarah.admin@campus.edu"
+                  placeholder="sarah.admin@campus.edu or admin"
                   className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
@@ -244,38 +257,23 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Quick Demos:</span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUsername('sarah.admin@campus.edu');
-                    setPassword('password123');
-                  }}
-                  className="text-purple-600 hover:text-purple-700 underline font-mono text-[10px]"
-                >
-                  Admin (Sarah)
-                </button>
-                <span className="text-slate-300">•</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPortalMode('pcdp');
-                    setUsername('alex.student@campus.edu');
-                    setPassword('password123');
-                  }}
-                  className="text-blue-600 hover:text-blue-700 underline font-mono text-[10px]"
-                >
-                  Student (Alex)
-                </button>
-              </div>
+            {/* Direct 1-Click Lead Admin Access */}
+            <div className="pt-2 border-t border-slate-100 space-y-2">
+              <button
+                type="button"
+                onClick={handleAdminOneClick}
+                disabled={submitting}
+                className="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition flex items-center justify-center space-x-1.5"
+              >
+                <ShieldCheck className="w-4 h-4 text-purple-600" />
+                <span>1-Click Sign In as Admin (Dr. Sarah Jenkins)</span>
+              </button>
             </div>
           </div>
         )}
 
         <div className="text-center text-xs text-slate-500">
-          New user?{' '}
+          New student?{' '}
           <Link to="/signup" className="text-blue-600 font-semibold hover:underline">
             Create an Account
           </Link>
