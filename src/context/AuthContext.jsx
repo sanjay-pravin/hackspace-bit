@@ -1,4 +1,4 @@
-import React, { createContext, useContext, state, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -43,10 +43,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loginWithGoogle = async (googleEmail = null) => {
+  const loginWithGoogle = async (googleEmail = null, displayName = null) => {
     setLoading(true);
     try {
-      const u = await authService.signInWithGoogle(googleEmail);
+      const u = await authService.signInWithGoogle(googleEmail, displayName);
       setUser(u);
       return u;
     } finally {
@@ -92,7 +92,6 @@ export function AuthProvider({ children }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-
 }
 
 export function useAuth() {

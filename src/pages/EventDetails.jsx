@@ -38,6 +38,7 @@ export default function EventDetails() {
   const [isEligibleModalOpen, setIsEligibleModalOpen] = useState(false);
   const [regType, setRegType] = useState('individual');
   const [teamName, setTeamName] = useState('');
+  const [joinTeamCode, setJoinTeamCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [regError, setRegError] = useState('');
   const [confirmedReg, setConfirmedReg] = useState(null);
@@ -118,6 +119,19 @@ export default function EventDetails() {
     setRegError('');
 
     try {
+      if (regType === 'join_team') {
+        if (!joinTeamCode.trim()) {
+          throw new Error('Please enter a squad invitation code.');
+        }
+        await teamService.joinTeamByCode(joinTeamCode.trim(), user.id);
+        const userRegs = await registrationService.getUserRegistrations(user.id);
+        const current = userRegs.find(r => r.event_id === event.id && r.status === 'confirmed');
+        setConfirmedReg(current || { public_registration_id: 'CONFIRMED' });
+        setExistingReg(current || true);
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        return;
+      }
+
       let teamId = null;
       if (regType === 'team') {
         if (!teamName.trim()) {
@@ -475,12 +489,12 @@ export default function EventDetails() {
 
             {allowsTeams && (
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-700">Registration Type</label>
-                <div className="grid grid-cols-2 gap-2">
+                <label className="block text-xs font-semibold text-slate-700">Participation Format</label>
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setRegType('individual')}
-                    className={`p-3 rounded-lg border text-left text-xs ${
+                    className={`p-2.5 rounded-lg border text-center text-xs ${
                       regType === 'individual'
                         ? 'bg-blue-50 border-blue-500 text-blue-900 font-semibold'
                         : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -491,13 +505,24 @@ export default function EventDetails() {
                   <button
                     type="button"
                     onClick={() => setRegType('team')}
-                    className={`p-3 rounded-lg border text-left text-xs ${
+                    className={`p-2.5 rounded-lg border text-center text-xs ${
                       regType === 'team'
                         ? 'bg-blue-50 border-blue-500 text-blue-900 font-semibold'
                         : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    Squad Lead
+                    Create Squad
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegType('join_team')}
+                    className={`p-2.5 rounded-lg border text-center text-xs ${
+                      regType === 'join_team'
+                        ? 'bg-blue-50 border-blue-500 text-blue-900 font-semibold'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    Join Squad
                   </button>
                 </div>
               </div>
@@ -514,6 +539,23 @@ export default function EventDetails() {
                   placeholder="e.g. Neural Knights"
                   className="w-full py-2 px-3 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
+              </div>
+            )}
+
+            {regType === 'join_team' && (
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Squad Invitation Code *</label>
+                <input
+                  type="text"
+                  required
+                  value={joinTeamCode}
+                  onChange={(e) => setJoinTeamCode(e.target.value.toUpperCase().trim())}
+                  placeholder="e.g. NK-7782"
+                  className="w-full py-2 px-3 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-500 uppercase"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Enter the team code provided by your team leader (e.g. <strong className="text-slate-800">NK-7782</strong>).
+                </p>
               </div>
             )}
 

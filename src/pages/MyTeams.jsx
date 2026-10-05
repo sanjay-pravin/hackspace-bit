@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { teamService } from '../services/teamService';
 import { eventService } from '../services/eventService';
@@ -11,7 +12,8 @@ import {
   ShieldCheck, 
   Calendar, 
   AlertCircle,
-  Sparkles
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 import LoadingState from '../components/LoadingState';
 import Modal from '../components/Modal';
@@ -32,6 +34,7 @@ export default function MyTeams() {
   const [joinCode, setJoinCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [copiedId, setCopiedId] = useState(null);
 
   const loadData = async () => {
@@ -43,10 +46,11 @@ export default function MyTeams() {
         eventService.getEvents(),
       ]);
       setTeams(userTeams);
-      // Filter events that allow teams
       const allowed = allEvents.filter(e => e.maximum_team_size > 1 && e.status === 'published');
       setTeamEvents(allowed);
-      if (allowed.length > 0) setSelectedEventId(allowed[0].id);
+      if (allowed.length > 0 && !selectedEventId) {
+        setSelectedEventId(allowed[0].id);
+      }
     } catch (err) {
       console.error('Error fetching teams:', err);
     } finally {
@@ -70,6 +74,7 @@ export default function MyTeams() {
       });
       setIsCreateModalOpen(false);
       setTeamName('');
+      setSuccessMsg('Squad created successfully! Share your team code with your teammates.');
       await loadData();
     } catch (err) {
       setErrorMsg(err.message || 'Failed to create team');
@@ -83,9 +88,10 @@ export default function MyTeams() {
     setSubmitting(true);
     setErrorMsg('');
     try {
-      await teamService.joinTeamByCode(joinCode, user.id);
+      const result = await teamService.joinTeamByCode(joinCode, user.id);
       setIsJoinModalOpen(false);
       setJoinCode('');
+      setSuccessMsg(`Joined squad "${result.team.name}" for "${result.event.title}"! Your registration has been confirmed.`);
       await loadData();
     } catch (err) {
       setErrorMsg(err.message || 'Failed to join team');
@@ -101,26 +107,32 @@ export default function MyTeams() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Team Management</h1>
-          <p className="text-xs text-slate-400">
-            Form squads, invite classmates with team codes, and participate in hackathons together.
+          <div className="inline-flex items-center space-x-1.5 text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+            <Users className="w-3.5 h-3.5" />
+            <span>Squad Hub</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            My Hackathon Squads
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Form squads, invite teammates with simple 6-character codes, and collaborate on campus challenges.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => {
               setErrorMsg('');
               setIsJoinModalOpen(true);
             }}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition flex items-center space-x-1.5"
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm transition flex items-center space-x-1.5"
           >
-            <KeyRound className="w-4 h-4 text-cyan-400" />
-            <span>Join by Code</span>
+            <KeyRound className="w-4 h-4 text-blue-600" />
+            <span>Join with Code</span>
           </button>
 
           <button
@@ -128,7 +140,7 @@ export default function MyTeams() {
               setErrorMsg('');
               setIsCreateModalOpen(true);
             }}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition flex items-center space-x-1.5"
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center space-x-1.5"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Create Squad</span>
@@ -136,30 +148,44 @@ export default function MyTeams() {
         </div>
       </div>
 
+      {successMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            <span>{successMsg}</span>
+          </div>
+          <button onClick={() => setSuccessMsg('')} className="text-emerald-700 hover:text-emerald-900 font-bold ml-2">
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Teams Grid */}
       {loading ? (
-        <LoadingState message="Loading your teams..." />
+        <div className="py-16">
+          <LoadingState message="Loading your squad memberships..." />
+        </div>
       ) : teams.length === 0 ? (
-        <div className="p-12 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center mx-auto">
-            <Users className="w-7 h-7" />
+        <div className="p-12 rounded-2xl bg-white border border-slate-200 text-center space-y-4 shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+            <Users className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white">No Team Memberships Yet</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Create a squad for an upcoming hackathon or enter an invitation code given by your team leader.
+          <h3 className="text-base font-bold text-slate-900">No Squad Memberships Yet</h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
+            Create a squad for an upcoming hackathon or ask your team captain for their invitation code to join.
           </p>
           <div className="flex justify-center gap-3 pt-2">
             <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white"
+              onClick={() => setIsJoinModalOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition"
             >
-              Create Team
+              Join Squad by Code
             </button>
             <button
-              onClick={() => setIsJoinModalOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm transition"
             >
-              Join by Code
+              Create Squad
             </button>
           </div>
         </div>
@@ -168,64 +194,102 @@ export default function MyTeams() {
           {teams.map((team) => (
             <div
               key={team.id}
-              className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-5"
+              className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-white">{team.name}</h3>
-                  <p className="text-xs text-cyan-400 font-medium mt-0.5 truncate max-w-xs">
+                  <h3 className="text-base font-bold text-slate-900">{team.name}</h3>
+                  <p className="text-xs text-blue-600 font-medium mt-0.5 truncate max-w-xs">
                     {team.event?.title || 'Campus Event'}
                   </p>
                 </div>
 
-                <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-                  {team.userRole === 'leader' ? 'Leader' : 'Member'}
+                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  team.userRole === 'leader'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'bg-slate-100 text-slate-700 border border-slate-200'
+                }`}>
+                  {team.userRole === 'leader' ? 'Squad Captain' : 'Squad Member'}
                 </span>
               </div>
 
               {/* Invitation Code Box */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-500 block">Invite Code</span>
-                  <span className="text-sm font-mono font-bold text-white tracking-widest">{team.team_code}</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    Invite Code (Share with teammates)
+                  </span>
+                  <span className="text-base font-mono font-extrabold text-slate-900 tracking-wider">
+                    {team.team_code}
+                  </span>
                 </div>
                 <button
                   onClick={() => copyToClipboard(team.team_code, team.id)}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center space-x-1"
+                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold shadow-sm transition flex items-center space-x-1"
                 >
                   {copiedId === team.id ? (
-                    <Check className="w-4 h-4 text-emerald-400" />
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700 font-bold">Copied!</span>
+                    </>
                   ) : (
-                    <Copy className="w-4 h-4" />
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Copy</span>
+                    </>
                   )}
-                  <span className="text-[10px] font-semibold">{copiedId === team.id ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
 
               {/* Roster */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>Roster</span>
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span className="font-semibold text-slate-700">Squad Roster</span>
                   <span>{team.members?.length || 1} / {team.event?.maximum_team_size || 4} members</span>
                 </div>
 
-                <div className="divide-y divide-slate-800/80 rounded-xl bg-slate-950/40 border border-slate-800/60 overflow-hidden">
+                <div className="divide-y divide-slate-100 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden">
                   {team.members?.map((m) => (
                     <div key={m.id} className="p-2.5 flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2.5">
                         <img
                           src={m.profile?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60'}
                           alt={m.profile?.display_name}
-                          className="w-6 h-6 rounded-lg object-cover"
+                          className="w-6 h-6 rounded-full object-cover border border-slate-200"
                         />
-                        <span className="text-white font-medium">{m.profile?.display_name}</span>
+                        <div>
+                          <p className="font-semibold text-slate-900 leading-tight">
+                            {m.profile?.display_name || 'Student'}
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            {m.profile?.student_id || m.profile?.department || 'Member'}
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">
-                        {m.role === 'leader' ? 'Squad Lead' : 'Teammate'}
+
+                      <span className="text-[10px] font-semibold text-slate-400 capitalize">
+                        {m.role === 'leader' ? '👑 Captain' : 'Member'}
                       </span>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Bottom Event Action */}
+              <div className="pt-2 flex justify-between items-center text-xs border-t border-slate-100">
+                <Link
+                  to={`/events/${team.event?.slug}`}
+                  className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center space-x-1"
+                >
+                  <span>View Event Details</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  to="/student/registrations"
+                  className="text-slate-500 hover:text-slate-700"
+                >
+                  My Registrations
+                </Link>
               </div>
             </div>
           ))}
@@ -236,57 +300,61 @@ export default function MyTeams() {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Create a New Team"
+        title="Create New Hackathon Squad"
       >
         <form onSubmit={handleCreateTeam} className="space-y-4">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-300 flex items-center space-x-2">
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 flex items-center space-x-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Squad Name *</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Squad Name *</label>
             <input
               type="text"
               required
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              placeholder="e.g. Cyber Ninjas"
-              className="w-full py-2.5 px-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              placeholder="e.g. Byte Busters, Neural Knights"
+              className="w-full py-2 px-3 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Target Event *</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Select Event *</label>
             <select
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
-              className="w-full py-2.5 px-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full py-2 px-3 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              {teamEvents.map((evt) => (
+              {teamEvents.map(evt => (
                 <option key={evt.id} value={evt.id}>
-                  {evt.title} ({evt.minimum_team_size}-{evt.maximum_team_size} members)
+                  {evt.title} (Max {evt.maximum_team_size} members)
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-2">
+          <p className="text-[11px] text-slate-500 leading-relaxed">
+            As captain, an invite code will be generated for your squad that you can share with teammates to register.
+          </p>
+
+          <div className="flex justify-end space-x-2 pt-2">
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+              className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition disabled:opacity-50"
+              className="px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition disabled:opacity-50"
             >
-              {submitting ? 'Creating...' : 'Create Squad'}
+              {submitting ? 'Creating Squad...' : 'Create Squad'}
             </button>
           </div>
         </form>
@@ -300,41 +368,48 @@ export default function MyTeams() {
       >
         <form onSubmit={handleJoinTeam} className="space-y-4">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-300 flex items-center space-x-2">
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 flex items-center space-x-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Invitation Code *</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Squad Invitation Code *</label>
             <input
               type="text"
               required
               value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase().trim())}
               placeholder="e.g. NK-7782"
-              className="w-full py-2.5 px-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full py-2.5 px-3 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
             />
-            <p className="text-[10px] text-slate-400 mt-1">
-              Ask your team captain for the 7-character invite code.
+            <p className="text-[11px] text-slate-500 mt-1">
+              Enter the squad code provided by your team captain (e.g. <strong className="text-slate-800">NK-7782</strong> for Neural Knights).
             </p>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-2">
+          <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-900 space-y-1">
+            <p className="font-semibold text-blue-950">✓ What happens when you join:</p>
+            <p>1. You are automatically enrolled in the squad roster.</p>
+            <p>2. Your event registration is confirmed and mapped with the team ID.</p>
+            <p>3. You can check in at the venue using the Venue OTP.</p>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-1">
             <button
               type="button"
               onClick={() => setIsJoinModalOpen(false)}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+              className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={submitting}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md transition disabled:opacity-50"
+              disabled={submitting || !joinCode.trim()}
+              className="px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition disabled:opacity-50"
             >
-              {submitting ? 'Verifying...' : 'Join Squad'}
+              {submitting ? 'Verifying Code...' : 'Join Squad'}
             </button>
           </div>
         </form>

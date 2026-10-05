@@ -161,21 +161,7 @@ export const authService = {
     return found;
   },
 
-  async signInWithGoogle(customGoogleEmail = null) {
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin,
-          },
-        });
-        if (!error && data) return data;
-      } catch (e) {
-        console.warn('OAuth fallback to local handler:', e);
-      }
-    }
-
+  async signInWithGoogle(customGoogleEmail = null, customDisplayName = null) {
     const targetEmail = customGoogleEmail
       ? customGoogleEmail.trim().toLowerCase()
       : 'sanjaypravinr.cs25@bitsathy.ac.in';
@@ -184,7 +170,7 @@ export const authService = {
       const sanjayUser = {
         id: 'user-student-sanjay',
         email: targetEmail,
-        display_name: 'SANJAYPRAVIN R',
+        display_name: customDisplayName || 'SANJAYPRAVIN R',
         role: 'student',
         department: 'Computer Science and Engineering',
         academic_year: '4th Year (2021-2025)',
@@ -211,7 +197,7 @@ export const authService = {
       found = {
         id: 'google-user-' + Date.now(),
         email: targetEmail,
-        display_name: targetEmail.split('@')[0].replace(/[._]/g, ' '),
+        display_name: customDisplayName || targetEmail.split('@')[0].replace(/[._]/g, ' '),
         role: isStaff ? 'admin' : 'student',
         department: 'Computer Science & Engineering',
         academic_year: '3rd Year',
